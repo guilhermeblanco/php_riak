@@ -29,7 +29,8 @@ zend_bool ensure_connected(riak_connection *connection TSRMLS_DC) /* {{{ */
       if (riack_reconnect(connection->client) == RIACK_SUCCESS) {
          connection->needs_reconnect = 0;
       } else {
-         result = 0;
+          zend_printf("ensure_connected failed\n");
+          result = 0;
       }
       RIAK_GLOBAL(reconnects)++;
    }
@@ -52,6 +53,9 @@ zend_bool ensure_connected_init(riak_connection *connection, char* host, int hos
       pefree(szHost, 0);
    } else {
       result = ensure_connected(connection TSRMLS_CC);
+   }
+   if (!result) {
+       zend_printf("ensure_connected_init failed\n");
    }
    return result;
 }
@@ -126,6 +130,7 @@ riak_connection *take_connection(char* host, int host_len, int port TSRMLS_DC) /
       if (!ensure_connected_init(connection, host, host_len, port TSRMLS_CC)) {
          connection->needs_reconnect = 1;
          release_connection_from_pool(pool, connection);
+         zend_printf("take_connection failed 1\n");
          return NULL;
       }
       RIAK_GLOBAL(open_connections_persistent)++;
@@ -137,6 +142,7 @@ riak_connection *take_connection(char* host, int host_len, int port TSRMLS_DC) /
       connection->client = riack_new_client(&riack_php_allocator);
       connection->last_used_at = time(NULL);
       if (!ensure_connected_init(connection, host, host_len, port TSRMLS_CC)) {
+          zend_printf("take_connection failed 2\n");
          release_connection(connection TSRMLS_CC);
          return NULL;
       }
@@ -178,6 +184,7 @@ riak_connection_pool_entry *take_connection_entry_from_pool(riak_connection_pool
       return current_entry;
     }
   }
+  zend_printf("take_connection_entry_from_pool failed\n");
   return NULL;
 }
 /* }}} */
