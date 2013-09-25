@@ -139,12 +139,9 @@ riak_connection *take_connection(char* host, int host_len, int port TSRMLS_DC) /
         entry = take_connection_entry_from_pool(pool);
 
         unlock_pool(TSRMLS_C);
-
-        zend_error(E_NOTICE, "Pool item locked");
     }
 
     if (entry) {
-        zend_error(E_NOTICE, "Connection from pool");
         connection = &entry->connection;
 
         if (!ensure_connected_init(connection, host, host_len, port TSRMLS_CC)) {
@@ -159,8 +156,6 @@ riak_connection *take_connection(char* host, int host_len, int port TSRMLS_DC) /
         RIAK_GLOBAL(open_connections_persistent)++;
     } else {
         /* We could not get a persistent connection, make a new non persistent connection. */
-        zend_error(E_NOTICE, "Connection outside of pool");
-        
         connection = pemalloc(sizeof(riak_connection), 0);
 
         memset(connection, 0, sizeof(riak_connection));
@@ -178,7 +173,6 @@ riak_connection *take_connection(char* host, int host_len, int port TSRMLS_DC) /
    }
 
    if (connection) {
-       zend_error(E_NOTICE, "Connected");
        RIAK_GLOBAL(open_connections)++;
    }
 
