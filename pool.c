@@ -32,7 +32,7 @@ zend_bool ensure_connected(riak_connection *connection TSRMLS_DC) /* {{{ */
         if (riack_reconnect(connection->client) == RIACK_SUCCESS) {
             connection->needs_reconnect = 0;
         } else {
-            zend_error(E_NOTICE, "ensure_connected failed");
+            zend_error(E_NOTICE, "ensure_connected failed on reconnect");
             result = 0;
         }
 
@@ -55,6 +55,9 @@ zend_bool ensure_connected_init(riak_connection *connection, char* host, int hos
         if (riack_connect(connection->client, szHost, port, NULL) == RIACK_SUCCESS) {
             connection->needs_reconnect = 0;
             result = 1;
+        } else {
+            zend_error(E_NOTICE, "ensure_connected_init failed on connect");
+            result = 0;
         }
 
         pefree(szHost, 0);
